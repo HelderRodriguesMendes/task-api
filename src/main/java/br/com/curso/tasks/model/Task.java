@@ -1,9 +1,7 @@
 package br.com.curso.tasks.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,8 +19,18 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    @NotBlank(message = "Titulo é obrigatório")
     private String title;
+
+    @Column(nullable = false)
+    @NotBlank(message = "Descrição é obrigatório")
     private String description;
+
+    @NotBlank(message = "Local é obrigatório")
+    @Column(nullable = false)
     private String local;
+
+    @Column(nullable = false)
     private LocalDateTime dateTime;
 }

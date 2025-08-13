@@ -1,0 +1,22 @@
+spring:
+  application:
+    name=Task Management
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: cursoKeycloakdb
+  generate-ddl: true
+  hibernate:
+    ddl-auto: validate
+  open-in-view: true
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/cursoKeycloakdb?allowPublicKeyRetrieval=true&useSSL=false
+    username: hrm-user
+    password: hrm
+    drive-class-name: com.mysql.cj.jdbc.Driver
+
+  flyway:
+    enable: true
+    baseline-on-migrate: true
