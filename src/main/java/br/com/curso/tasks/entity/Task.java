@@ -1,36 +1,37 @@
-package br.com.curso.tasks.model;
+package br.com.curso.tasks.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "Titulo é obrigatório")
     private String title;
 
     @Column(nullable = false)
-    @NotBlank(message = "Descrição é obrigatório")
     private String description;
 
-    @NotBlank(message = "Local é obrigatório")
     @Column(nullable = false)
     private String local;
 
     @Column(nullable = false)
     private LocalDateTime dateTime;
+
+    @ManyToOne
+    @JoinColumn(name = "created_id")
+    private User createdId;
+
+    @OneToMany(mappedBy = "taskId")
+    private List<Guest> guests;
 }
