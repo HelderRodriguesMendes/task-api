@@ -1,4 +1,4 @@
-package br.com.curso.tasks.dto;
+package br.com.curso.tasks.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
