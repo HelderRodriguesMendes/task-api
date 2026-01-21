@@ -1,16 +1,17 @@
 package br.com.curso.tasks.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Data
-@AllArgsConstructor
+@Table(name = "guests")
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
+
 public class Guest {
 
     @Id
@@ -18,10 +19,11 @@ public class Guest {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "taskId")
-    private Task taskId;
+    @JoinColumn(name = "task_id")
+    @JsonBackReference
+    private Task task;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
-    private User userId;
+    @JoinColumn(name = "user_id")
+    private User user;
 }

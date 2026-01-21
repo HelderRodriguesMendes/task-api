@@ -1,12 +1,12 @@
-package br.com.curso.tasks.dto;
+package br.com.curso.tasks.dto.request;
 
-import br.com.curso.tasks.entity.Guest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 public class TaskRequestDTO {
-
+    @Setter
     private Long id;
 
     @NotBlank(message = "Titulo é obrigatório")
@@ -31,9 +31,9 @@ public class TaskRequestDTO {
     @NotNull(message = "Data e hora são obrigatórios")
     private LocalDateTime dateTime;
 
-    @NotNull(message = "Nenhum convidado foi selecionado")
-    private List<Guest> guests;
-
     @NotNull
     private UserRequestDTO created;
+
+    @NotNull(message = "Nenhum convidado foi selecionado")
+    private List<GuestRequestDTO> guests;
 }

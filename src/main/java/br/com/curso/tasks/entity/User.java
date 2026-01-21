@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -23,10 +24,11 @@ public class User {
     private String email;
     private String phone;
 
-    @OneToMany(mappedBy = "user")
-    private List<Guest> guests;
-
-    @OneToMany(mappedBy = "createdId")
     @JsonIgnore
-    private List<Task> tasksCreated;
+    @OneToMany(mappedBy = "user")
+    private List<Guest> guests = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "created")
+    private List<Task> tasksCreated = new ArrayList<>();
 }

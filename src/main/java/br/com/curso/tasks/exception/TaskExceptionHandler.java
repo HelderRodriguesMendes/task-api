@@ -1,11 +1,12 @@
 package br.com.curso.tasks.exception;
-
+import org.springframework.lang.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -15,31 +16,72 @@ import java.util.Map;
 @ControllerAdvice
 public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
 
-    protected ResponseEntity<Object>handleNotFound(NotFound ex, WebRequest request) {
-        return handleExceptionInternal(
-            ex,
-            ex.getMessageError(),
-            new HttpHeaders(),
-            ex.getExceptionResponseDTO().getHttpStatus(),
-            request);
-    }
-
+    @Nullable
+    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException ex,
         HttpHeaders headers,
-        HttpStatus status,
+        HttpStatusCode status,
         WebRequest request
     ) {
         Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
 
-        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(status, errors);
-
+        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(HttpStatus.BAD_REQUEST, errors);
+        logger.info("REQUIRED FIELDS: " + responseDTO.getErrors());
         return handleExceptionInternal(ex, responseDTO, headers, status, request);
+    }
+
+    @ExceptionHandler(NotFound.class)
+    protected ResponseEntity<Object> handleNotFound(NotFound ex, WebRequest request) {
+        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(
+            ex.getStatus(),
+            ex.getMessage()
+        );
+
+        return handleExceptionInternal(
+            ex,
+            responseDTO,
+            new HttpHeaders(),
+            HttpStatus.valueOf(responseDTO.getStatusCode()),
+            request
+        );
+    }
+
+    @ExceptionHandler(UserConflictException.class)
+    protected ResponseEntity<Object> handleNotFound(UserConflictException ex, WebRequest request) {
+        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(
+            ex.getStatus(),
+            ex.getMessage()
+        );
+
+        return handleExceptionInternal(
+            ex,
+            responseDTO,
+            new HttpHeaders(),
+            HttpStatus.valueOf(responseDTO.getStatusCode()),
+            request
+        );
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
+        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "Ocorreu um erro inesperado: " + ex.getMessage()
+        );
+
+        return handleExceptionInternal(
+            ex,
+            responseDTO,
+            new HttpHeaders(),
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            request
+        );
     }
 }

@@ -7,6 +7,9 @@ import br.com.curso.tasks.dto.response.UserResponseDTO;
 import br.com.curso.tasks.entity.Task;
 import br.com.curso.tasks.entity.User;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public class ConvertEntityAndDTO {
 
     private ConvertEntityAndDTO() {
@@ -29,6 +32,7 @@ public class ConvertEntityAndDTO {
             .name(user.getName())
             .email(user.getEmail())
             .phone(user.getPhone())
+            .tasksCreated(user.getTasksCreated() == null ? new ArrayList<>() : user.getTasksCreated().stream().map(ConvertEntityAndDTO::convertToTaskResponseDTO).collect(Collectors.toList()))
             .build();
     }
 
@@ -46,8 +50,10 @@ public class ConvertEntityAndDTO {
             .description(taskRequestDTO.getDescription())
             .local(taskRequestDTO.getLocal())
             .dateTime(taskRequestDTO.getDateTime())
-            .createdId(user)
+            .created(user)
+            .guests(new ArrayList<>())
             .build();
+
     }
 
     public static TaskResponseDTO convertToTaskResponseDTO(Task task) {
@@ -57,8 +63,7 @@ public class ConvertEntityAndDTO {
             .description(task.getDescription())
             .local(task.getLocal())
             .dateTime(task.getDateTime())
-            .createdId(task.getCreatedId())
-            .guests(task.getGuests())
+            .created(task.getCreated())
             .build();
     }
 }

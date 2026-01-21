@@ -1,5 +1,6 @@
 package br.com.curso.tasks.service.impl;
 
+import br.com.curso.tasks.dto.request.GuestRequestDTO;
 import br.com.curso.tasks.enums.MessageException;
 import br.com.curso.tasks.exception.NotFound;
 import br.com.curso.tasks.entity.User;
@@ -24,7 +25,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(User user) {
-        validateEmailNotExists(user.getEmail());
+        log.info("Saving user with id {}", user.getId());
+        findByEmail(user.getEmail(), true);
         User userSaved = userRepository.save(user);
         log.info("User saved with id {}", userSaved.getId());
         return userSaved;
@@ -32,48 +34,80 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new NotFound(
-            MessageException.USER_NOT_FOUND.getMessage(),
-            HttpStatus.NOT_FOUND)
-        );
+        log.info("Finding user with id {}", id);
+        Optional<User> optionalUser = userRepository.findWithTasksCreatedById(id);
+        if (optionalUser.isEmpty()){
+            log.info("User not found with id {}", id);
+           throw new NotFound(MessageException.USER_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        log.info("User found with id {}", id);
+        return optionalUser.get();
     }
 
     @Override
     public List<User> findAll() {
-        return userRepository.findAll();
+        log.info("Finding all users");
+        List<User> list = userRepository.findAll();
+        if(list.isEmpty()){
+            log.info("No users found");
+            throw new NotFound(MessageException.LIST_USERS_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        log.info("Users found: {}", list.size());
+        return list;
     }
 
     @Override
-    public List<User> findByEmail(List<String> emails) {
+    public List<User> getUserActive(List<GuestRequestDTO> emails) {
+        log.info("Finding users by emails");
         List<User> users = emails.stream()
+            .map(GuestRequestDTO::getEmail)
             .map(userRepository::findByEmail)
             .flatMap(Optional::stream)
             .toList();
-        return users;
+        log.info("Users found by emails: {}", users.size());
+                             return users;
+    }
+
+    @Override
+    public User findByEmail(String email, boolean validateEmailExists) {
+        log.info("Finding user by email {}", email);
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if(validateEmailExists && optionalUser.isPresent()){
+            log.info("User with email {} already exists", email);
+            throw new UserConflictException(MessageException.EMAIL_REGISTERED.getMessage(), HttpStatus.CONFLICT);
+        }
+
+        if (optionalUser.isEmpty()) {
+            log.info("User not found by email {}", email);
+            throw new NotFound(MessageException.USER_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        log.info("User found by email {}", email);
+        return optionalUser.get();
     }
 
     @Transactional
     @Override
     public User update(Long id, User user) {
-        validateEmailNotExists(user.getEmail());
+        log.info("Updating user with id {}", id);
+        User userSave = userRepository.findById(id).get();
+        if (!userSave.getEmail().equals(user.getEmail())){
+            findByEmail(user.getEmail(), true);
+        }
         User updateUser = findById(id);
         updateUser.setName(user.getName());
         updateUser.setEmail(user.getEmail());
         updateUser.setPhone(user.getPhone());
-        return updateUser;
+        User updatedUser = userRepository.save(updateUser);
+        log.info("User updated with id {}", id);
+        return updatedUser;
     }
 
     @Override
     public void delete(Long id) {
+        log.info("Deleting user with id {}", id);
         findById(id);
         userRepository.deleteById(id);
-    }
-
-    @Override
-    public void validateEmailNotExists(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            throw new UserConflictException(MessageException.EMAIL_REGISTERED.getMessage(), HttpStatus.CONFLICT);
-        }
+        log.info("User deleted with id {}", id);
     }
 }
