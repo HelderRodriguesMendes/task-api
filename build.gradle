@@ -30,6 +30,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-mysql'
+
+	implementation("org.springframework.boot:spring-boot-starter-validation:3.4.4")
+	implementation("org.springframework.boot:spring-boot-starter-security:3.5.0")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.5.0")
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
