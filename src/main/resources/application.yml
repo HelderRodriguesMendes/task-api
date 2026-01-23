@@ -1,4 +1,12 @@
 spring:
+  keycloak:
+    endpoint: http://localhost:8080
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/schedule-task
+
   application:
     name=Task Management
   jpa:
