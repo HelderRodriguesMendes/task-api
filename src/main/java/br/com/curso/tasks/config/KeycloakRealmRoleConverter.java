@@ -10,7 +10,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class KeycloakRealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+public class KeycloakRealmRoleConverter implements Converter<Jwt,
+    Collection<GrantedAuthority>> {
 
     @Override
     public Collection convert(Jwt jwt) {
@@ -22,7 +23,8 @@ public class KeycloakRealmRoleConverter implements Converter<Jwt, Collection<Gra
         if (roles == null) {
             return Collections.emptyList();
         }
-        return roles.stream().map(rolename -> new SimpleGrantedAuthority("ROLE_" + rolename))
+        return roles.stream().map(rolename ->
+                new SimpleGrantedAuthority("ROLE_" + rolename))
             .collect(Collectors.toList());
     }
 }

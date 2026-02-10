@@ -1,13 +1,14 @@
 package br.com.curso.tasks.exception;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 
-@Getter
-@Setter
+@AllArgsConstructor
+@Data
+@Builder
 public class ExceptionResponseDTO {
     private int statusCode;
     private String status;

@@ -1,5 +1,7 @@
 package br.com.curso.tasks.config;
 
+import br.com.curso.tasks.exception.CustomAccessDeniedHandler;
+import br.com.curso.tasks.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +14,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
-public class SecurityConfg {
+public class SecurityConfig {
+
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -31,6 +36,9 @@ public class SecurityConfg {
                 .jwt(jwt -> jwt
                     .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 )
+                .authenticationEntryPoint(customAuthenticationEntryPoint))
+                .exceptionHandling(exception -> exception
+                    .accessDeniedHandler(customAccessDeniedHandler)
             );
         return http.build();
     }

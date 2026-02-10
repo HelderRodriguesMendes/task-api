@@ -13,6 +13,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.security.access.AccessDeniedException;
+import br.com.curso.tasks.enums.MessageException;
+
 @ControllerAdvice
 public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -68,6 +71,21 @@ public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
+        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(
+            HttpStatus.FORBIDDEN,
+            MessageException.FORBIDDEN_ACCESS.getMessage()
+        );
+
+        return handleExceptionInternal(
+            ex,
+            responseDTO,
+            new HttpHeaders(),
+            HttpStatus.FORBIDDEN,
+            request
+        );
+    }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {

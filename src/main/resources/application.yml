@@ -25,6 +25,13 @@ spring:
     password: hrm
     drive-class-name: com.mysql.cj.jdbc.Driver
 
+  keykloak:
+    client:
+      id: admin-cli
+      username: helderrodrigues37@gmail.com
+      password: Hrm@1234
+      grant-type: password
+
   flyway:
     enable: true
     baseline-on-migrate: true
