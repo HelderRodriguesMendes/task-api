@@ -1,4 +1,4 @@
-package br.com.curso.tasks.service.responseClient;
+package br.com.curso.tasks.service.responseclient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

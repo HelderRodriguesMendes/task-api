@@ -1,6 +1,5 @@
 package br.com.curso.tasks.exception;
 
-import org.springframework.lang.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +19,7 @@ import br.com.curso.tasks.enums.MessageException;
 @ControllerAdvice
 public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @SuppressWarnings("java:S2638")
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException ex,
@@ -33,8 +33,8 @@ public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-
-        ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(HttpStatus.BAD_REQUEST, errors);
+        ExceptionResponseDTO responseDTO =
+            new ExceptionResponseDTO(HttpStatus.BAD_REQUEST, errors);
         logger.info("REQUIRED FIELDS: " + responseDTO.getErrors());
         return handleExceptionInternal(ex, responseDTO, headers, status, request);
     }

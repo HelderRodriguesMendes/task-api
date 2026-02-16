@@ -1,6 +1,6 @@
 package br.com.curso.tasks.service;
 
-import br.com.curso.tasks.service.responseClient.KeycloakTokenResponse;
+import br.com.curso.tasks.service.responseclient.KeycloakTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;

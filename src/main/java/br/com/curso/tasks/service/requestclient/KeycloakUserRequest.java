@@ -1,4 +1,4 @@
-package br.com.curso.tasks.service.requestClient;
+package br.com.curso.tasks.service.requestclient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

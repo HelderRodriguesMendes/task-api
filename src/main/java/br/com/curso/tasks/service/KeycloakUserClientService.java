@@ -2,7 +2,7 @@ package br.com.curso.tasks.service;
 
 import br.com.curso.tasks.enums.MessageException;
 import br.com.curso.tasks.exception.NotFound;
-import br.com.curso.tasks.service.requestClient.KeycloakUserRequest;
+import br.com.curso.tasks.service.requestclient.KeycloakUserRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
