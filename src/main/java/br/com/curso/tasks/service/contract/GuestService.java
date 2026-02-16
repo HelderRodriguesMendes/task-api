@@ -1,4 +1,4 @@
-package br.com.curso.tasks.service;
+package br.com.curso.tasks.service.contract;
 
 import br.com.curso.tasks.entity.Guest;
 

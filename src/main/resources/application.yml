@@ -1,6 +1,12 @@
 spring:
   keycloak:
     endpoint: http://localhost:8080
+    id: admin-cli
+    username: helderrodrigues37@gmail.com
+    password: Hrm@1234
+    grant-type: password
+    uri-access-token-admin: /realms/schedule-task/protocol/openid-connect/token
+    uri-create-user: /admin/realms/schedule-task/users
   security:
     oauth2:
       resourceserver:
@@ -24,13 +30,6 @@ spring:
     username: hrm_user
     password: hrm
     drive-class-name: com.mysql.cj.jdbc.Driver
-
-  keykloak:
-    client:
-      id: admin-cli
-      username: helderrodrigues37@gmail.com
-      password: Hrm@1234
-      grant-type: password
 
   flyway:
     enable: true

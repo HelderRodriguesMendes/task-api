@@ -4,7 +4,7 @@ import br.com.curso.tasks.entity.Guest;
 import br.com.curso.tasks.enums.MessageException;
 import br.com.curso.tasks.exception.NotFound;
 import br.com.curso.tasks.repository.GuestRepository;
-import br.com.curso.tasks.service.GuestService;
+import br.com.curso.tasks.service.contract.GuestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

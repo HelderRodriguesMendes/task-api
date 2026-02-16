@@ -1,10 +1,9 @@
-package br.com.curso.tasks.service;
+package br.com.curso.tasks.service.contract;
 
 import br.com.curso.tasks.dto.request.GuestRequestDTO;
 import br.com.curso.tasks.entity.User;
 
 import java.util.List;
-import java.util.Optional;
 
 
 public interface UserService {

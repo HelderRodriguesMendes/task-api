@@ -1,4 +1,4 @@
-package br.com.curso.tasks.service;
+package br.com.curso.tasks.service.contract;
 
 import br.com.curso.tasks.dto.request.TaskRequestDTO;
 import br.com.curso.tasks.entity.Task;

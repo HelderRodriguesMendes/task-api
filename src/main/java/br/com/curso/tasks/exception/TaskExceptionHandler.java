@@ -1,5 +1,6 @@
 package br.com.curso.tasks.exception;
-import org.springframework.lang.Nullable;
+
+import org.springframework.lang.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,7 +20,6 @@ import br.com.curso.tasks.enums.MessageException;
 @ControllerAdvice
 public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @Nullable
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException ex,
@@ -56,7 +56,7 @@ public class TaskExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserConflictException.class)
-    protected ResponseEntity<Object> handleNotFound(UserConflictException ex, WebRequest request) {
+    protected ResponseEntity<Object> handleUserConflict(UserConflictException ex, WebRequest request) {
         ExceptionResponseDTO responseDTO = new ExceptionResponseDTO(
             ex.getStatus(),
             ex.getMessage()

@@ -3,7 +3,7 @@ package br.com.curso.tasks.controller;
 import br.com.curso.tasks.dto.request.TaskRequestDTO;
 import br.com.curso.tasks.dto.response.TaskResponseDTO;
 import br.com.curso.tasks.entity.Task;
-import br.com.curso.tasks.service.TaskService;
+import br.com.curso.tasks.service.contract.TaskService;
 import br.com.curso.tasks.utils.ConvertEntityAndDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

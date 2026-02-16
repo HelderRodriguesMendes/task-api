@@ -14,7 +14,8 @@ public enum MessageException {
     UNAUTHORIZED_ACCESS ("Token inválido, ausente ou expirado."),
     FORBIDDEN_ACCESS ("Você não tem permissão para acessar esse recurso."),
     TASKS_NOT_FOUND_FOR_USER("Usuário não possui tarefas cadastradas: "),
-    EMAIL_REGISTERED ("E-mail já cadastrado: ");
+    EMAIL_REGISTERED ("E-mail já cadastrado: "),
+    HEADER_LOCATION_NOT_FOUND ("The header 'Location' was not found in the response.");
 
     private final String message;
 }

@@ -6,7 +6,7 @@ import br.com.curso.tasks.exception.NotFound;
 import br.com.curso.tasks.entity.User;
 import br.com.curso.tasks.exception.UserConflictException;
 import br.com.curso.tasks.repository.UserRepository;
-import br.com.curso.tasks.service.UserService;
+import br.com.curso.tasks.service.contract.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

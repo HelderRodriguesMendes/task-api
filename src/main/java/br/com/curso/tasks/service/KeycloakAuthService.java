@@ -1,27 +1,32 @@
 package br.com.curso.tasks.service;
 
-import br.com.curso.tasks.service.response.KeycloakTokenResponse;
+import br.com.curso.tasks.service.responseClient.KeycloakTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+@Service
 public class KeycloakAuthService {
 
     private final WebClient webClient;
 
-    @Value("${keykloak.client.id}")
+    @Value("${spring.keykloak.id}")
     private String clientIdKeycloak;
 
-    @Value("${keykloak.client.username}")
+    @Value("${spring.keykloak.username}")
     private String usernameKeycloak;
 
-    @Value("${keykloak.client.password}")
+    @Value("${spring.keykloak.password}")
     private String passwordKeycloak;
 
-    @Value("${keykloak.client.grant-type}")
+    @Value("${spring.keykloak.grant-type}")
     private String grantTypeKeycloak;
+
+    @Value("${spring.keykloak.uri-access-token-admin}")
+    private String uriAcessTokenAdmin;
 
     public KeycloakAuthService(String keycloakEndpoint) {
         this.webClient = WebClient.builder()
@@ -38,7 +43,7 @@ public class KeycloakAuthService {
         formData.add("grant_type", grantTypeKeycloak);
 
         return webClient.post()
-            .uri("/realms/schedule-task/protocol/openid-connect/token")
+            .uri(uriAcessTokenAdmin)
             .bodyValue(formData)
             .retrieve()
             .bodyToMono(KeycloakTokenResponse.class)
