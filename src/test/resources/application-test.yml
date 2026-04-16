@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+  keycloak:
+    endpoint: http://localhost:8080
+    id: admin-cli
+    username-keycloak: admin
+    password-keycloak: admin
+    grant-type: password
+    uri-access-token-admin: /realms/master/protocol/openid-connect/token
+    uri-create-user: /admin/realms/schedule-task/users
+    uri-reset-password: /admin/realms/schedule-task/users/{id}/reset-password
+server:
+  port: 0
+

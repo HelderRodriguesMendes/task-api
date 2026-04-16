@@ -41,6 +41,22 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
+	testRuntimeOnly 'com.h2database:h2'
+	testRuntimeOnly 'javax.servlet:javax.servlet-api:4.0.1'
+	testImplementation 'org.eclipse.jetty:jetty-server:9.4.49.v20220914'
+	testImplementation 'org.eclipse.jetty:jetty-util:9.4.49.v20220914'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.eclipse.jetty') {
+            details.useVersion '9.4.49.v20220914'
+            details.because 'Force Jetty 9 to be compatible with WireMock test runtime'
+        }
+    }
 }
 
 tasks.named('test') {

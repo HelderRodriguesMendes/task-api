@@ -1,4 +1,4 @@
-package br.com.curso.tasks.utils;
+package br.com.curso.tasks.util;
 
 import br.com.curso.tasks.dto.request.TaskRequestDTO;
 import br.com.curso.tasks.dto.request.UserRequestDTO;
@@ -8,7 +8,6 @@ import br.com.curso.tasks.entity.Task;
 import br.com.curso.tasks.entity.User;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class ConvertEntityAndDTO {
 
@@ -32,17 +31,11 @@ public class ConvertEntityAndDTO {
             .name(user.getName())
             .email(user.getEmail())
             .phone(user.getPhone())
-            .tasksCreated(user.getTasksCreated() == null ? new ArrayList<>() : user.getTasksCreated().stream().map(ConvertEntityAndDTO::convertToTaskResponseDTO).collect(Collectors.toList()))
+            .tasksCreated(user.getTasksCreated() == null ? new ArrayList<>() : user.getTasksCreated().stream().map(ConvertEntityAndDTO::convertToTaskResponseDTO).toList())
             .build();
     }
 
     public static Task convertToTaskEntity(TaskRequestDTO taskRequestDTO) {
-        User user  = User.builder()
-            .id(taskRequestDTO.getCreated().getId())
-            .name(taskRequestDTO.getCreated().getName())
-            .email(taskRequestDTO.getCreated().getEmail())
-            .phone(taskRequestDTO.getCreated().getPhone())
-            .build();
 
         return Task.builder()
             .id(taskRequestDTO.getId())
@@ -50,7 +43,6 @@ public class ConvertEntityAndDTO {
             .description(taskRequestDTO.getDescription())
             .local(taskRequestDTO.getLocal())
             .dateTime(taskRequestDTO.getDateTime())
-            .created(user)
             .guests(new ArrayList<>())
             .build();
 

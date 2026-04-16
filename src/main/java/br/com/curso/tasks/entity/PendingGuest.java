@@ -1,5 +1,6 @@
 package br.com.curso.tasks.entity;
 
+import br.com.curso.tasks.enums.PendingGuestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PendingGuest {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,4 +28,16 @@ public class PendingGuest {
     @NonNull
     @Column(name = "guest_email", nullable = false)
     private String guestEmail;
+
+    @Column(name = "keycloak_id")
+    private String keycloakId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private PendingGuestStatus status = PendingGuestStatus.PENDING;
+
+    @Column(name = "attempts", nullable = false)
+    @Builder.Default
+    private Integer attempts = 0;
 }

@@ -4,7 +4,7 @@ import br.com.curso.tasks.dto.request.TaskRequestDTO;
 import br.com.curso.tasks.dto.response.TaskResponseDTO;
 import br.com.curso.tasks.entity.Task;
 import br.com.curso.tasks.service.contract.TaskService;
-import br.com.curso.tasks.utils.ConvertEntityAndDTO;
+import br.com.curso.tasks.util.ConvertEntityAndDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

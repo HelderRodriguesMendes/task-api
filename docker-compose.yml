@@ -1,11 +1,31 @@
 version: '3.8'
 
 services:
+  mysql:
+    image: mysql:8
+    container_name: db-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: curso-dev
+      MYSQL_DATABASE: cursoKeycloakdb
+      MYSQL_USER: hrm_user
+      MYSQL_PASSWORD: hrm
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
+    container_name: db-keycloak
     command: start-dev
+    depends_on:
+      - mysql
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
+
+volumes:
+  mysql_data:

@@ -2,11 +2,12 @@ spring:
   keycloak:
     endpoint: http://localhost:8080
     id: admin-cli
-    username: helderrodrigues37@gmail.com
-    password: Hrm@1234
+    username-keycloak: admin
+    password-keycloak: admin
     grant-type: password
-    uri-access-token-admin: /realms/schedule-task/protocol/openid-connect/token
+    uri-access-token-admin: /realms/master/protocol/openid-connect/token
     uri-create-user: /admin/realms/schedule-task/users
+    uri-reset-password: /admin/realms/schedule-task/users/{id}/reset-password
   security:
     oauth2:
       resourceserver:
