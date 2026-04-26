@@ -182,7 +182,7 @@ public class TaskServiceImpl implements TaskService {
         List<PendingGuest> pendingGuests = taskRequestDTO.getGuests().stream()
             .filter(dto -> !emailsGuestsExist.contains(dto.getEmail()))
             .map(dto -> new PendingGuest(null, task, dto.getName(),
-                dto.getEmail(), null, PendingGuestStatus.PENDING, 0)).toList();
+                dto.getEmail(), null, PendingGuestStatus.PENDING, 0, null)).toList();
         log.info("Pending guests created: {}", pendingGuests.size());
 
         verifyPendingGuestsKeycloak(pendingGuests);
