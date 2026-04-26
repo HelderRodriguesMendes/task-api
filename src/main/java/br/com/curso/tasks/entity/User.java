@@ -31,4 +31,7 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "created")
     private List<Task> tasksCreated = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<PendingGuest> pendingGuests;
 }

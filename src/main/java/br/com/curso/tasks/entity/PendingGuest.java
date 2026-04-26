@@ -40,4 +40,8 @@ public class PendingGuest {
     @Column(name = "attempts", nullable = false)
     @Builder.Default
     private Integer attempts = 0;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
