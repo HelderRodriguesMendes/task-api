@@ -11,8 +11,6 @@ import br.com.curso.tasks.repository.UserRepository;
 import br.com.curso.tasks.service.KeycloakUserClientService;
 import br.com.curso.tasks.service.contract.UserService;
 import br.com.curso.tasks.service.requestclient.KeycloakUserRequest;
-import br.com.curso.tasks.service.requestclient.ResetPasswordRequest;
-import br.com.curso.tasks.util.PasswordGeneratorUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -132,25 +130,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<Integer> keycloakCreateUser(PendingGuest pendingGuest) {
         log.info("Creating user in Keycloak for email {}", pendingGuest.getGuestEmail());
-        KeycloakUserRequest keycloakUserRequest = getKeycloakUserRequest(pendingGuest);
-        String password = PasswordGeneratorUtil.generate(10);
-        log.info("Generated password for user {}: {}", pendingGuest.getGuestEmail(), password);
 
-        ResetPasswordRequest passwordRequest = new ResetPasswordRequest("password", password, true);
+        KeycloakUserRequest keycloakUserRequest = getKeycloakUserRequest(pendingGuest);
 
         return keycloakUserClientService.createUser(keycloakUserRequest)
-            .flatMap(userId -> keycloakUserClientService.resetPassword(userId, passwordRequest)
-                .then(Mono.fromCallable(() -> {
-                    int updated = pendingGuestRepository.updateKeycloakIdById(userId, pendingGuest.getId());
-                    log.info("PendingGuest updated (id={}, email={}): keycloakId={}", pendingGuest.getId(), pendingGuest.getGuestEmail(), userId);
-                    return updated;
-                }))
-            )
-            .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)).filter(throwable -> {
-                String cls = throwable.getClass().getSimpleName();
-                return cls.contains("WebClientResponseException") || cls.contains("Timeout") || cls.contains("IOException");
-            }))
-            ;
+            .flatMap(userId -> {
+                int updated = pendingGuestRepository.updateKeycloakIdById(userId, pendingGuest.getId());
+                log.info("PendingGuest updated (id={}, email={}): keycloakId={}", pendingGuest.getId(),
+                    pendingGuest.getGuestEmail(), userId);
+                return keycloakUserClientService.executeActionsEmail(
+                        userId,
+                        List.of("VERIFY_EMAIL", "UPDATE_PASSWORD")
+                    )
+                    .then(Mono.just(updated))
+                    .onErrorResume(e -> {
+                        log.warn("Failed to execute actions email for user {}: {}", userId, e.getMessage());
+                        return Mono.just(updated);
+                    });
+            })
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
+                .filter(throwable -> {
+                    String cls = throwable.getClass().getSimpleName();
+                    return cls.contains("WebClientResponseException")
+                        && !throwable.getMessage().contains("409"); // Don't retry on conflict
+                })
+            );
     }
 
     @Override
@@ -164,15 +168,15 @@ public class UserServiceImpl implements UserService {
     }
 
     private KeycloakUserRequest getKeycloakUserRequest(PendingGuest pendingGuest) {
+        String[] nameParts = pendingGuest.getGuestName().split(" ");
         return KeycloakUserRequest.builder()
             .username(pendingGuest.getGuestEmail())
             .enabled(true)
-            .emailVerified(true)
+            .emailVerified(false)
             .email(pendingGuest.getGuestEmail())
-            .firstName(pendingGuest.getGuestName())
-            .firstName(pendingGuest.getGuestName().split(" ")[0])
-            .lastName(pendingGuest.getGuestName().split(" ")[1])
-            .requiredActions(List.of("UPDATE_PASSWORD"))
+            .firstName(nameParts[0])
+            .lastName(nameParts.length > 1 ? nameParts[1] : "")
+            .requiredActions(List.of("VERIFY_EMAIL", "UPDATE_PASSWORD"))
             .build();
     }
 }
