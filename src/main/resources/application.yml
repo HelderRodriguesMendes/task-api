@@ -8,6 +8,7 @@ spring:
     uri-access-token-admin: /realms/master/protocol/openid-connect/token
     uri-create-user: /admin/realms/schedule-task/users
     uri-reset-password: /admin/realms/schedule-task/users/{id}/reset-password
+    uri-execute-email-valid-user: /admin/realms/schedule-task/users/{userId}/execute-actions-email
   security:
     oauth2:
       resourceserver:

@@ -54,16 +54,17 @@ public class PendingGuestsKeycloakListener {
     }
 
     private void createKeycloakUser(Long id, PendingGuest pendingGuest) {
-        try {
-            userService.keycloakCreateUser(pendingGuest)
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnError(e -> log.error("Error creating Keycloak user for {}: {}", pendingGuest.getGuestEmail(), e.getMessage()))
-                .block();
-
-            pendingGuestRepository.updateStatus(id, PendingGuestStatus.SUCCESS.name());
-        } catch (Exception inner) {
-            log.error("Failed to create Keycloak user for {}: {}", pendingGuest.getGuestEmail(), inner.getMessage());
-            pendingGuestRepository.updateStatus(id, PendingGuestStatus.FAILED.name());
-        }
+        userService.keycloakCreateUser(pendingGuest)
+            .subscribeOn(Schedulers.boundedElastic())
+            .subscribe(
+                updated -> {
+                    log.info("Keycloak user created for {} and updated {} records", pendingGuest.getGuestEmail(), updated);
+                    pendingGuestRepository.updateStatus(id, PendingGuestStatus.KEYCLOAK_CREATED.name());
+                },
+                error -> {
+                    log.error("Failed to create Keycloak user for {}: {}", pendingGuest.getGuestEmail(), error.getMessage());
+                    pendingGuestRepository.updateStatus(id, PendingGuestStatus.FAILED.name());
+                }
+            );
     }
 }

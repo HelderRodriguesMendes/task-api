@@ -3,7 +3,6 @@ package br.com.curso.tasks.service;
 import br.com.curso.tasks.enums.MessageException;
 import br.com.curso.tasks.exception.NotFound;
 import br.com.curso.tasks.service.requestclient.KeycloakUserRequest;
-import br.com.curso.tasks.service.requestclient.ResetPasswordRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +25,9 @@ public class KeycloakUserClientService {
 
     @Value("${spring.keycloak.uri-create-user}")
     private String uriCreateUser;
+
+    @Value("${spring.keycloak.uri-execute-email-valid-user}")
+    private String uriExecuteEmailValidUser;
 
     @Value("${spring.keycloak.uri-reset-password}")
     private String uriresetPassword;
@@ -68,25 +71,14 @@ public class KeycloakUserClientService {
             );
     }
 
-    public Mono<Void> resetPassword(String userId, ResetPasswordRequest passwordRequest) {
+    public Mono<Void> executeActionsEmail(String userId, List<String> actions) {
         return authService.getAccessTokenAdmin()
             .flatMap(token -> webClient.put()
-                .uri(uriresetPassword, userId)
+                .uri(uriExecuteEmailValidUser, userId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .bodyValue(passwordRequest)
-                .exchangeToMono(response -> {
-                    if (response.statusCode().is2xxSuccessful()) {
-                        log.info("Password reset successful for userId {}", userId);
-                        return Mono.empty();
-                    } else {
-                        return response.bodyToMono(String.class)
-                            .defaultIfEmpty("")
-                            .flatMap(body -> {
-                                log.error("Keycloak reset password failed. status: {}, body: {}", response.statusCode(), body);
-                                return Mono.error(new IllegalStateException("Keycloak error: " + response.statusCode()));
-                            });
-                    }
-                })
+                .bodyValue(actions)
+                .retrieve()
+                .bodyToMono(Void.class)
             );
     }
 }
