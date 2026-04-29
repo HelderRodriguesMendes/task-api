@@ -42,6 +42,7 @@ public class ConvertEntityAndDTO {
             .title(taskRequestDTO.getTitle())
             .description(taskRequestDTO.getDescription())
             .local(taskRequestDTO.getLocal())
+            .created(taskRequestDTO.getCreated() != null ? ConvertEntityAndDTO.convertToUserRequestDTO(taskRequestDTO.getCreated()) : null)
             .dateTime(taskRequestDTO.getDateTime())
             .guests(new ArrayList<>())
             .build();
