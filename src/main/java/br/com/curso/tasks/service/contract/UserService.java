@@ -3,6 +3,7 @@ package br.com.curso.tasks.service.contract;
 import br.com.curso.tasks.dto.request.GuestRequestDTO;
 import br.com.curso.tasks.entity.PendingGuest;
 import br.com.curso.tasks.entity.User;
+import br.com.curso.tasks.service.requestclient.KeycloakUserRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -16,6 +17,6 @@ public interface UserService {
     public User findByEmail(String email, boolean validateEmailExists);
     public User update(Long id, User user);
     public void delete(Long id);
-    public Mono<Integer> keycloakCreateUser(PendingGuest pendingGuest);
+    public Mono<Integer> keycloakCreateUser(KeycloakUserRequest keycloakUserRequest);
     public List<PendingGuest> getPendingGuestKeycloak(List<PendingGuest> pendingGuests);
 }

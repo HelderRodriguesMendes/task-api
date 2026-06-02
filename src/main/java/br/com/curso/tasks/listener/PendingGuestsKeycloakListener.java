@@ -5,6 +5,7 @@ import br.com.curso.tasks.entity.PendingGuest;
 import br.com.curso.tasks.enums.PendingGuestStatus;
 import br.com.curso.tasks.repository.PendingGuestRepository;
 import br.com.curso.tasks.service.contract.UserService;
+import br.com.curso.tasks.service.requestclient.KeycloakUserRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -30,12 +31,14 @@ public class PendingGuestsKeycloakListener {
             event.getTaskId(), event.getPendingGuestIds().size(), Thread.currentThread().getName());
 
         for (Long id : event.getPendingGuestIds()) {
+            log.debug("Queued pendingGuest id={} for processing", id);
             processPendingGuest(id);
         }
     }
 
     private void processPendingGuest(Long id) {
         try {
+            log.debug("Processing pendingGuest id={}", id);
             Optional<PendingGuest> opt = pendingGuestRepository.findById(id);
             if (opt.isEmpty()) {
                 log.warn("PendingGuest id={} not found when processing Keycloak", id);
@@ -43,8 +46,9 @@ public class PendingGuestsKeycloakListener {
             }
 
             PendingGuest pendingGuest = opt.get();
-            pendingGuestRepository.updateStatus(id, PendingGuestStatus.PROCESSING.name());
-            pendingGuestRepository.incrementAttempts(id);
+            int s = pendingGuestRepository.updateStatus(id, PendingGuestStatus.PROCESSING.name());
+            int a = pendingGuestRepository.incrementAttempts(id);
+            log.debug("Updated status rows={}, incrementAttempts rows={} for pendingGuest id={}", s, a, id);
 
             createKeycloakUser(id, pendingGuest);
 
@@ -54,7 +58,8 @@ public class PendingGuestsKeycloakListener {
     }
 
     private void createKeycloakUser(Long id, PendingGuest pendingGuest) {
-        userService.keycloakCreateUser(pendingGuest)
+        KeycloakUserRequest keycloakUserRequest = KeycloakUserRequest.getKeycloakUserRequest(pendingGuest);
+        userService.keycloakCreateUser(keycloakUserRequest)
             .subscribeOn(Schedulers.boundedElastic())
             .subscribe(
                 updated -> {

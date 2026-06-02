@@ -35,43 +35,53 @@ public class KeycloakUserClientService {
     public Mono<String> createUser(KeycloakUserRequest keycloakUserRequest) {
         log.info("Creating user in Keycloak with email {}", keycloakUserRequest.getEmail());
         return authService.getAccessTokenAdmin()
-            .flatMap(token -> webClient.post()
-                .uri(uriCreateUser)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .bodyValue(keycloakUserRequest)
-                .exchangeToMono(response -> {
-                    HttpStatus status = (HttpStatus) response.statusCode();
-                    if (status.is2xxSuccessful() || status == HttpStatus.CREATED) {
-                        URI location = response.headers().asHttpHeaders().getLocation();
-                        if (location != null) {
-                            String path = location.getPath();
-                            String id = path.substring(path.lastIndexOf('/') + 1);
-                            log.info("User created in Keycloak with id {}", id);
-                            return Mono.just(id);
-                        } else {
-                            log.error("Location header not found in Keycloak response for user {}", keycloakUserRequest.getEmail());
-                            return Mono.error(new NotFound(MessageException.HEADER_LOCATION_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND));
+            .flatMap(token -> {
+                log.debug("Token admin obtido, iniciando requisição de criação de usuário para {}", keycloakUserRequest.getEmail());
+                log.debug("Payload de criação Keycloak (sanitized): {}", keycloakUserRequest);
+                return webClient.post()
+                    .uri(uriCreateUser)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .bodyValue(keycloakUserRequest)
+                    .exchangeToMono(response -> {
+                        var status = response.statusCode();
+                        log.debug("Resposta do Keycloak (create user) para {}: status={}", keycloakUserRequest.getEmail(), status);
+                        // success (201 CREATED or other 2xx)
+                        if (status.is2xxSuccessful()) {
+                            URI location = response.headers().asHttpHeaders().getLocation();
+                            if (location != null) {
+                                String path = location.getPath();
+                                String id = path.substring(path.lastIndexOf('/') + 1);
+                                log.info("User created in Keycloak with id {} (email={})", id, keycloakUserRequest.getEmail());
+                                return Mono.just(id);
+                            } else {
+                                log.error("Location header not found in Keycloak response for user {}", keycloakUserRequest.getEmail());
+                                return Mono.error(new NotFound(MessageException.HEADER_LOCATION_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND));
+                            }
                         }
-                    } else if (status == HttpStatus.CONFLICT) {
-                        return response.bodyToMono(String.class)
-                            .defaultIfEmpty("No body")
-                            .flatMap(body -> {
-                                log.warn("Keycloak returned 409 Conflict when creating user {}: {}", keycloakUserRequest.getEmail(), body);
-                                return Mono.error(new IllegalStateException("Usuário já existe no Keycloak: " + body));
-                            });
-                    } else {
+
+                        // conflict - user exists
+                        if (status.value() == HttpStatus.CONFLICT.value()) {
+                            return response.bodyToMono(String.class)
+                                .defaultIfEmpty("No body")
+                                .flatMap(body -> {
+                                    log.warn("Keycloak returned 409 Conflict when creating user {}: {}", keycloakUserRequest.getEmail(), body);
+                                    return Mono.error(new IllegalStateException("Usuário já existe no Keycloak: " + body));
+                                });
+                        }
+
+                        // other errors - include body for debugging
                         return response.bodyToMono(String.class)
                             .defaultIfEmpty("")
                             .flatMap(body -> {
                                 log.error("Keycloak create user failed. status: {}, body: {}", status, body);
                                 return Mono.error(new IllegalStateException("Keycloak error: " + status));
                             });
-                    }
-                })
-            );
+                    });
+            });
     }
 
     public Mono<Void> executeActionsEmail(String userId, List<String> actions) {
+        log.info("Executando ações de e-mail no Keycloak para userId={} actions={}", userId, actions);
         return authService.getAccessTokenAdmin()
             .flatMap(token -> webClient.put()
                 .uri(uriExecuteEmailValidUser, userId)
@@ -79,6 +89,8 @@ public class KeycloakUserClientService {
                 .bodyValue(actions)
                 .retrieve()
                 .bodyToMono(Void.class)
+                .doOnSuccess(v -> log.debug("execute-actions-email sucesso para userId={}", userId))
+                .doOnError(err -> log.warn("Falha em execute-actions-email userId={}: {}", userId, err.getMessage()))
             );
     }
 }

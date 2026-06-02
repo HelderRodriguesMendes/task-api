@@ -128,16 +128,17 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public Mono<Integer> keycloakCreateUser(PendingGuest pendingGuest) {
-        log.info("Creating user in Keycloak for email {}", pendingGuest.getGuestEmail());
+    public Mono<Integer> keycloakCreateUser(KeycloakUserRequest keycloakUserRequest) {
+        log.info("Creating user in Keycloak for email {}", keycloakUserRequest.getEmail());
 
-        KeycloakUserRequest keycloakUserRequest = getKeycloakUserRequest(pendingGuest);
 
         return keycloakUserClientService.createUser(keycloakUserRequest)
+            .doOnSubscribe(s -> log.debug("Starting Keycloak create for pendingGuest id={} email={}", keycloakUserRequest.getId(), keycloakUserRequest.getEmail()))
+            .doOnError(err -> log.error("Error initiating Keycloak create for pendingGuest id={} email={}: {}", keycloakUserRequest.getId(), keycloakUserRequest.getEmail(), err.getMessage()))
             .flatMap(userId -> {
-                int updated = pendingGuestRepository.updateKeycloakIdById(userId, pendingGuest.getId());
-                log.info("PendingGuest updated (id={}, email={}): keycloakId={}", pendingGuest.getId(),
-                    pendingGuest.getGuestEmail(), userId);
+                int updated = pendingGuestRepository.updateKeycloakIdById(userId, keycloakUserRequest.getId());
+                log.info("PendingGuest updated (id={}, email={}): keycloakId={}", keycloakUserRequest.getId(),
+                    keycloakUserRequest.getEmail(), userId);
                 return keycloakUserClientService.executeActionsEmail(
                         userId,
                         List.of("VERIFY_EMAIL", "UPDATE_PASSWORD")
@@ -148,6 +149,7 @@ public class UserServiceImpl implements UserService {
                         return Mono.just(updated);
                     });
             })
+            .doOnSuccess(updated -> log.info("Keycloak create flow completed for pendingGuest id={} email={} rowsUpdated={}", keycloakUserRequest.getId(), keycloakUserRequest.getEmail(), updated))
             .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
                 .filter(throwable -> {
                     String cls = throwable.getClass().getSimpleName();
@@ -165,18 +167,5 @@ public class UserServiceImpl implements UserService {
                 pendingGuest.getGuestEmail()))
             .flatMap(List::stream)
             .toList();
-    }
-
-    private KeycloakUserRequest getKeycloakUserRequest(PendingGuest pendingGuest) {
-        String[] nameParts = pendingGuest.getGuestName().split(" ");
-        return KeycloakUserRequest.builder()
-            .username(pendingGuest.getGuestEmail())
-            .enabled(true)
-            .emailVerified(false)
-            .email(pendingGuest.getGuestEmail())
-            .firstName(nameParts[0])
-            .lastName(nameParts.length > 1 ? nameParts[1] : "")
-            .requiredActions(List.of("VERIFY_EMAIL", "UPDATE_PASSWORD"))
-            .build();
     }
 }

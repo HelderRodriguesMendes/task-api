@@ -43,8 +43,8 @@ public class KeycloakAuthService {
     }
 
     public Mono<String> getAccessTokenAdmin() {
-        String url = endpoint + uriAccessTokenAdmin;
-
+        // use the relative URI (WebClient has baseUrl configured)
+        log.info("Solicitando token admin do Keycloak em {}", uriAccessTokenAdmin);
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("client_id", clientId);
         form.add("username", username);
@@ -52,7 +52,7 @@ public class KeycloakAuthService {
         form.add("grant_type", grantType);
 
         return webClient.post()
-            .uri(url)
+            .uri(uriAccessTokenAdmin)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .body(BodyInserters.fromFormData(form))
             .retrieve()
@@ -62,6 +62,7 @@ public class KeycloakAuthService {
                 if (token == null) {
                     throw new IllegalStateException("access_token não encontrado na resposta do Keycloak");
                 }
+                log.debug("Admin access token successfully retrieved (length={})", token.toString().length());
                 return token.toString();
             })
             .doOnError(err -> log.error("Falha ao recuperar token admin do Keycloak: {}", err.getMessage()));
